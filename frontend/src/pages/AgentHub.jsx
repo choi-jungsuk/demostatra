@@ -62,7 +62,7 @@ export default function AgentHub() {
         <div className="demo-ops-flow" aria-hidden="true"><i /><i /><i /><span /><span /></div>
         <p className="demo-ops-eyebrow">{isKo ? 'AI 기반 전시회 운영 AX 플랫폼' : 'EXHIBITION OPERATIONS WORKFLOW'}</p>
         <h1 id="demo-ops-hero-title">{isKo ? '전시회 운영 업무를 AI 기반 AX로 전환합니다.' : 'Organize every exhibition operation in one place.'}</h1>
-        <p className="demo-ops-subtitle">{isKo ? '참가기업 발굴부터 해외 바이어 관리, 상담일정, 사후관리까지 담당자 검토와 승인을 중심으로 연결합니다.' : 'Manage exhibitor discovery, buyers, B2B meetings, and aftercare through clear review and approval workflows.'}</p>
+        <p className="demo-ops-subtitle">{isKo ? '참가기업 발굴부터 바이어 매칭·상담·사후관리까지, 전시 운영 전 과정을 하나로 연결합니다.' : 'From exhibitor discovery to buyer matching, meetings, and aftercare, connect the full exhibition operations workflow in one place.'}</p>
         <button type="button" className="demo-ops-cta" onClick={() => navigate('/overview')}>
           {isKo ? '전시 운영 현황 보기' : 'View Operations Overview'} <span aria-hidden="true">→</span>
         </button>
