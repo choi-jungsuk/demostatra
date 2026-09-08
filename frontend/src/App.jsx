@@ -44,6 +44,7 @@ const navItems = [
 ]
 
 const notificationCount = 3
+const workflowDetailPaths = new Set(['/ax-data', '/consultants', '/partner-search', '/schedule', '/aftercare'])
 
 function NotFound() {
   const location = useLocation()
@@ -436,6 +437,14 @@ export default function App() {
       </header>
 
       <main id="main-content" className="container">
+        {workflowDetailPaths.has(location.pathname) && (
+          <nav className="workflow-back-nav" aria-label={lang === 'ko' ? '이전 화면 탐색' : 'Previous page navigation'}>
+            <Link className="workflow-back-link" to="/agent-hub">
+              <span aria-hidden="true">←</span>
+              {lang === 'ko' ? '이전 화면으로' : 'Back to previous screen'}
+            </Link>
+          </nav>
+        )}
         <Routes>
           <Route path="/admin/trade-mission-events" element={<TradeMissionEventManager />} />
           <Route path="/" element={<AgentHub />} />
