@@ -3845,6 +3845,7 @@ h3 {
 
 .rmc-prompts li {
   margin-bottom: 4px;
+  overflow-wrap: anywhere;
 }
 
 .rmc-cta {
@@ -4053,13 +4054,14 @@ h3 {
 
 .rw-quick-prompts {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
 }
 
 .rw-quick-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
   border: 1px solid #E2E8F0;
@@ -4068,6 +4070,8 @@ h3 {
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .rw-quick-btn.koaa:hover,
