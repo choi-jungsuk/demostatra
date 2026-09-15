@@ -21,12 +21,12 @@ const RECRUITMENT_MODES = {
     tagsEn: ['Auto Parts · Mobility', 'Exhibitor Discovery', 'Excel Export'],
     ctaKo: 'demostatra 업체 유치 시작하기 →',
     ctaEn: 'Start demostatra Recruitment →',
-    agentIntroKo: '최근 3년간 주요 국내외 박람회 참가 이력과 기업 특성을 검토해, demostatra 부스 참가 가능성이 있는 국내기업 후보를 추천합니다. 전시 분야와 원하는 조건을 입력해 주세요.',
+    agentIntroKo: '최근 3년간 주요 국내외 박람회 참가 이력과 기업 특성을 검토해, 올해 참가업체 유치목표의 20배수 국내기업 후보를 추천합니다. 전시 분야와 원하는 조건을 입력해 주세요.',
     agentIntroEn: 'I help identify prospective exhibitors for demostatra. Please enter industry, product, region or export market conditions.',
     quickPromptsKo: [
-      '지난 3년간 주요 국내외 뷰티 박람회에 참가했던 K-뷰티 업체들의 특성을 파악해서, 우리 K-뷰티 박람회에 부스 참가할 가능성이 있는 국내업체를 추천해 줘',
-      '지난 3년간 주요 국내외 의료기기 박람회에 참가했던 국내 의료기기 업체들의 특성을 파악해서, 우리 의료기기 박람회에 부스 참가할 가능성이 있는 국내업체를 추천해 줘',
-      '지난 3년간 주요 국내외 보안·안전 박람회에 참가했던 국내 보안장비 업체들의 특성을 파악해서, 우리 보안 박람회에 부스 참가할 가능성이 있는 국내업체를 추천해 줘',
+      '지난 3년간 주요 국내외 뷰티 박람회에 참가했던 K-뷰티 업체들의 특성을 파악해서, 올해 참가업체 유치목표의 20배수 국내업체를 추천해 줘',
+      '지난 3년간 주요 국내외 의료기기 박람회에 참가했던 국내 의료기기 업체들의 특성을 파악해서, 올해 참가업체 유치목표의 20배수 국내업체를 추천해 줘',
+      '지난 3년간 주요 국내외 보안·안전 박람회에 참가했던 국내 보안장비 업체들의 특성을 파악해서, 올해 참가업체 유치목표의 20배수 국내업체를 추천해 줘',
     ],
     quickPromptsEn: [
       'Find Korean automotive electronics manufacturers',
