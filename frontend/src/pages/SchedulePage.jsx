@@ -4,6 +4,23 @@ import { useI18n } from '../i18n/I18nProvider';
 import Button from '../ui/Button';
 import { useSearchParams } from 'react-router-dom';
 
+const DEMO_CONSULTATIONS = [
+  {
+    _id: 'demo-ces-completed',
+    companyName: 'Global Mobility Buyer Inc.',
+    date: '2026-01-07',
+    timeSlot: '14:00 - 14:30',
+    reqType: 'OFFLINE',
+    status: 'CONFIRMED',
+    boothNumber: 'A-210',
+    agenda: '전기차 부품 공급 및 북미 유통 협력 상담',
+    isDemo: true,
+  },
+];
+
+const OUTCOME_OPTIONS = ['후속 상담 희망', '견적 요청', '계약 검토', '정보 교환', '해당 없음'];
+const NEXT_ACTION_OPTIONS = ['담당자 검토 필요', '후속 상담 일정 등록', '견적서 전달', '후속 조치 없음'];
+
 export default function SchedulePage() {
   const { t, lang } = useI18n();
   const [searchParams] = useSearchParams();
@@ -25,6 +42,8 @@ export default function SchedulePage() {
   const [selectedDate, setSelectedDate] = useState('');
   const [schedulerMap, setSchedulerMap] = useState({});
   const [selectedExhibition, setSelectedExhibition] = useState('Global Tech Exhibition 2026');
+  const [meetingOutcomes, setMeetingOutcomes] = useState({});
+  const [outcomeEditor, setOutcomeEditor] = useState(null);
 
   // Form states (Online only)
   const [onlineForm, setOnlineForm] = useState({ 
@@ -102,12 +121,14 @@ export default function SchedulePage() {
       api.listCompanies({ limit: 50 })
     ])
       .then(([consultRes, compRes]) => {
-        setConsultations(Array.isArray(consultRes) ? consultRes : []);
+        const loadedConsultations = Array.isArray(consultRes) ? consultRes : [];
+        setConsultations(loadedConsultations.length > 0 ? loadedConsultations : DEMO_CONSULTATIONS);
         setCompanies(Array.isArray(compRes?.data) ? compRes.data : []);
         setLoading(false);
       })
       .catch(err => {
         console.error("SchedulePage load error:", err);
+        setConsultations(DEMO_CONSULTATIONS);
         setLoading(false);
       });
   };
@@ -117,6 +138,51 @@ export default function SchedulePage() {
   }, []);
 
   const filteredConsultations = consultations.filter(c => c.reqType === activeTab);
+
+  const getMeetingOutcome = (consultationId) => meetingOutcomes[consultationId] || {
+    completed: false,
+    exhibitor: null,
+    buyer: null,
+  };
+
+  const markMeetingCompleted = (consultationId) => {
+    setMeetingOutcomes(prev => ({
+      ...prev,
+      [consultationId]: { ...getMeetingOutcome(consultationId), completed: true },
+    }));
+  };
+
+  const openOutcomeEditor = (consultationId, party) => {
+    const saved = getMeetingOutcome(consultationId)[party];
+    setOutcomeEditor({
+      consultationId,
+      party,
+      rating: saved?.rating || 5,
+      result: saved?.result || '후속 상담 희망',
+      nextAction: saved?.nextAction || '담당자 검토 필요',
+      note: saved?.note || '',
+    });
+  };
+
+  const saveOutcome = () => {
+    if (!outcomeEditor) return;
+    const { consultationId, party, rating, result, nextAction, note } = outcomeEditor;
+    setMeetingOutcomes(prev => ({
+      ...prev,
+      [consultationId]: {
+        ...getMeetingOutcome(consultationId),
+        completed: true,
+        [party]: { rating: Number(rating), result, nextAction, note },
+      },
+    }));
+    setOutcomeEditor(null);
+  };
+
+  const renderStars = (rating) => (
+    <span aria-label={`${rating} out of 5`} style={{ color: '#f59e0b', letterSpacing: '1px', fontSize: '15px' }}>
+      {'★'.repeat(rating)}<span style={{ color: '#cbd5e1' }}>{'★'.repeat(5 - rating)}</span>
+    </span>
+  );
 
   // Online video submit handler
   const handleOnlineSubmit = async (e) => {
@@ -430,7 +496,13 @@ export default function SchedulePage() {
             </div>
           ) : (
             <div style={{ display: 'grid', gap: '1rem' }}>
-              {filteredConsultations.map(c => (
+              {filteredConsultations.map(c => {
+                const outcome = getMeetingOutcome(c._id);
+                const bothRated = outcome.exhibitor && outcome.buyer;
+                const mutualRating = bothRated
+                  ? ((outcome.exhibitor.rating + outcome.buyer.rating) / 2).toFixed(1)
+                  : null;
+                return (
                 <div 
                   key={c._id} 
                   style={{ 
@@ -480,6 +552,54 @@ export default function SchedulePage() {
                       </>
                     )}
                   </p>
+
+                  {c.status === 'CONFIRMED' && (
+                    <section style={{ margin: '0 0 1.1rem', padding: '0.9rem', borderRadius: '12px', background: outcome.completed ? '#f8fafc' : '#eff6ff', border: `1px solid ${outcome.completed ? '#e2e8f0' : '#bfdbfe'}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: outcome.completed ? '0.75rem' : 0 }}>
+                        <div>
+                          <strong style={{ display: 'block', fontSize: '12.5px', color: '#1e293b' }}>📋 {lang === 'ko' ? '상담 성과' : 'Meeting Outcome'}</strong>
+                          <span style={{ fontSize: '11px', color: outcome.completed ? '#475569' : '#2563eb' }}>
+                            {outcome.completed
+                              ? (bothRated ? (lang === 'ko' ? '양측 입력 완료' : 'Both parties submitted') : (lang === 'ko' ? '상대방 응답 대기' : 'Awaiting other party'))
+                              : (lang === 'ko' ? '상담 종료 후 성과를 기록하세요.' : 'Record the outcome after the meeting.')}
+                          </span>
+                        </div>
+                        {!outcome.completed && (
+                          <Button onClick={() => markMeetingCompleted(c._id)} style={{ borderRadius: '999px', fontSize: '11px', padding: '5px 11px' }}>
+                            ✓ {lang === 'ko' ? '상담 완료 처리' : 'Mark Complete'}
+                          </Button>
+                        )}
+                      </div>
+
+                      {outcome.completed && (
+                        <div style={{ display: 'grid', gap: '0.55rem' }}>
+                          {[
+                            { key: 'exhibitor', label: lang === 'ko' ? '참가기업 만족도' : 'Exhibitor Satisfaction' },
+                            { key: 'buyer', label: lang === 'ko' ? '바이어 만족도' : 'Buyer Satisfaction' },
+                          ].map(({ key, label }) => {
+                            const partyOutcome = outcome[key];
+                            return (
+                              <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>{label}</span>
+                                {partyOutcome ? (
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>{renderStars(partyOutcome.rating)}<strong style={{ fontSize: '12px', color: '#334155' }}>{partyOutcome.rating.toFixed(1)}</strong></span>
+                                ) : (
+                                  <button type="button" onClick={() => openOutcomeEditor(c._id, key)} style={{ border: '1px solid #93c5fd', borderRadius: '999px', background: '#fff', color: '#2563eb', padding: '4px 9px', cursor: 'pointer', fontSize: '11px', fontWeight: 700 }}>
+                                    {lang === 'ko' ? '성과 입력' : 'Add outcome'}
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+
+                          <div style={{ marginTop: '0.15rem', paddingTop: '0.65rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#0f172a' }}>{lang === 'ko' ? '상호 만족도' : 'Mutual Satisfaction'}</span>
+                            {mutualRating ? <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>{renderStars(Math.round(mutualRating))}<strong style={{ color: '#b45309', fontSize: '13px' }}>{mutualRating}</strong></span> : <span style={{ fontSize: '11px', color: '#64748b' }}>{lang === 'ko' ? '양측 응답 대기' : 'Awaiting both responses'}</span>}
+                          </div>
+                        </div>
+                      )}
+                    </section>
+                  )}
                   
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     {c.reqType === 'ONLINE' && c.meetingLink && (
@@ -498,7 +618,8 @@ export default function SchedulePage() {
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -757,6 +878,54 @@ export default function SchedulePage() {
         </div>
 
       </div>
+
+      {outcomeEditor && (
+        <div role="dialog" aria-modal="true" aria-label="상담 성과 입력" style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(15, 23, 42, 0.42)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ width: '100%', maxWidth: '460px', background: '#fff', borderRadius: '18px', boxShadow: '0 24px 48px rgba(15, 23, 42, 0.25)', padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.1rem' }}>
+              <div>
+                <span style={{ color: '#2563eb', fontSize: '11px', fontWeight: 800 }}>{outcomeEditor.party === 'exhibitor' ? (lang === 'ko' ? '참가기업' : 'EXHIBITOR') : (lang === 'ko' ? '바이어' : 'BUYER')}</span>
+                <h3 style={{ margin: '3px 0 0', fontSize: '18px', color: '#0f172a' }}>{lang === 'ko' ? '상담 성과 입력' : 'Record Meeting Outcome'}</h3>
+              </div>
+              <button type="button" onClick={() => setOutcomeEditor(null)} aria-label="닫기" style={{ border: 0, background: 'transparent', color: '#64748b', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
+            </div>
+
+            <label style={{ display: 'block', marginBottom: '1rem', fontSize: '12px', fontWeight: 800, color: '#334155' }}>
+              {lang === 'ko' ? '전반 만족도' : 'Overall Satisfaction'}
+              <div style={{ display: 'flex', gap: '4px', marginTop: '7px' }}>
+                {[1, 2, 3, 4, 5].map(value => (
+                  <button key={value} type="button" onClick={() => setOutcomeEditor(prev => ({ ...prev, rating: value }))} aria-label={`${value}점`} style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: 0, color: value <= outcomeEditor.rating ? '#f59e0b' : '#cbd5e1', fontSize: '28px', lineHeight: 1 }}>★</button>
+                ))}
+                <strong style={{ alignSelf: 'center', marginLeft: '6px', color: '#334155' }}>{outcomeEditor.rating}.0</strong>
+              </div>
+            </label>
+
+            <label style={{ display: 'block', marginBottom: '1rem', fontSize: '12px', fontWeight: 800, color: '#334155' }}>
+              {lang === 'ko' ? '상담 결과' : 'Meeting Result'}
+              <select value={outcomeEditor.result} onChange={e => setOutcomeEditor(prev => ({ ...prev, result: e.target.value }))} style={{ display: 'block', width: '100%', marginTop: '6px', padding: '9px 10px', border: '1px solid #cbd5e1', borderRadius: '9px', background: '#fff' }}>
+                {OUTCOME_OPTIONS.map(option => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </label>
+
+            <label style={{ display: 'block', marginBottom: '1rem', fontSize: '12px', fontWeight: 800, color: '#334155' }}>
+              {lang === 'ko' ? '후속 조치' : 'Next Action'}
+              <select value={outcomeEditor.nextAction} onChange={e => setOutcomeEditor(prev => ({ ...prev, nextAction: e.target.value }))} style={{ display: 'block', width: '100%', marginTop: '6px', padding: '9px 10px', border: '1px solid #cbd5e1', borderRadius: '9px', background: '#fff' }}>
+                {NEXT_ACTION_OPTIONS.map(option => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </label>
+
+            <label style={{ display: 'block', marginBottom: '1.25rem', fontSize: '12px', fontWeight: 800, color: '#334155' }}>
+              {lang === 'ko' ? '한 줄 메모 (선택)' : 'Short Note (Optional)'}
+              <textarea rows="3" maxLength="200" value={outcomeEditor.note} onChange={e => setOutcomeEditor(prev => ({ ...prev, note: e.target.value }))} placeholder={lang === 'ko' ? '상담 중 확인한 요청사항을 간단히 기록하세요.' : 'Briefly record any requests discussed.'} style={{ display: 'block', boxSizing: 'border-box', width: '100%', marginTop: '6px', padding: '9px 10px', border: '1px solid #cbd5e1', borderRadius: '9px', resize: 'vertical' }} />
+            </label>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+              <Button variant="secondary" onClick={() => setOutcomeEditor(null)} style={{ borderRadius: '999px' }}>{lang === 'ko' ? '취소' : 'Cancel'}</Button>
+              <Button onClick={saveOutcome} style={{ borderRadius: '999px' }}>{lang === 'ko' ? '성과 저장' : 'Save Outcome'}</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
