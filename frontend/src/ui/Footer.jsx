@@ -30,17 +30,17 @@ export default function Footer() {
       <section aria-labelledby="partner-institution-title" style={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        margin: '0 auto 24px',
+        alignItems: 'flex-start',
+        margin: '0 0 24px',
         paddingBottom: '22px',
         borderBottom: '1px solid #E5EDF2'
       }}>
         <p id="partner-institution-title" style={{
-          margin: '0 0 10px',
-          color: '#637B88',
-          fontSize: '12px',
+          margin: '0 0 14px',
+          color: '#172B38',
+          fontSize: '21px',
           fontWeight: 800,
-          letterSpacing: '.08em'
+          letterSpacing: '-.04em'
         }}>
           {lang === 'ko' ? '협력기관' : 'PARTNER INSTITUTION'}
         </p>
