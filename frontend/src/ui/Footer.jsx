@@ -1,5 +1,6 @@
 import React from 'react';
 import { useI18n } from '../i18n/I18nProvider.jsx';
+import ainGlobalLogo from '../assets/ain-global-logo.png';
 
 export default function Footer() {
   const { lang } = useI18n();
@@ -26,6 +27,30 @@ export default function Footer() {
       width: '100%',
       fontFamily: "'NanumSquare', -apple-system, sans-serif"
     }}>
+      <section aria-labelledby="partner-institution-title" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        margin: '0 auto 24px',
+        paddingBottom: '22px',
+        borderBottom: '1px solid #E5EDF2'
+      }}>
+        <p id="partner-institution-title" style={{
+          margin: '0 0 10px',
+          color: '#637B88',
+          fontSize: '12px',
+          fontWeight: 800,
+          letterSpacing: '.08em'
+        }}>
+          {lang === 'ko' ? '협력기관' : 'PARTNER INSTITUTION'}
+        </p>
+        <img
+          src={ainGlobalLogo}
+          alt="아인글로벌"
+          style={{ display: 'block', width: '156px', height: 'auto' }}
+        />
+        <span style={{ marginTop: '5px', color: '#2C4C61', fontSize: '13px', fontWeight: 700 }}>(재)아인글로벌</span>
+      </section>
       <div style={{
         display: 'flex',
         justifyContent: 'center',
