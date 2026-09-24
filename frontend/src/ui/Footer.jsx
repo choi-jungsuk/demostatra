@@ -31,7 +31,9 @@ export default function Footer() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
-        margin: '0 0 24px',
+        width: '100%',
+        maxWidth: '1380px',
+        margin: '0 auto 24px',
         paddingBottom: '22px',
         borderBottom: '1px solid #E5EDF2'
       }}>
